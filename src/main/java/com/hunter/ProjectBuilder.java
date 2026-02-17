@@ -7,8 +7,6 @@ import java.nio.file.Paths;
 import java.util.Scanner;
 
 public class ProjectBuilder {
-  private String userName;
-  private String projectName;
 
   public static void main(String[] args) {
     // int exitCode = 0;
@@ -26,7 +24,6 @@ public class ProjectBuilder {
     System.out.println("Provide directory name:");
 
     String dirName = scanner.next();
-    this.dirName = dirName;
     try {
       ProjectBuilder.createNestedDirectories(dirName);
     } catch (IOException e) {
@@ -60,7 +57,7 @@ public class ProjectBuilder {
     }
   }
 
-  private static void writeFile(String pathName, String content) throws IOException {
+  private static void createFile(String pathName, String content) throws IOException {
     try {
     } catch (IOException e) {
       System.err.println("Failed to write file: " + e.getMessage());
