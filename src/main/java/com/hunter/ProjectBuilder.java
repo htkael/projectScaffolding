@@ -1,10 +1,15 @@
 package com.hunter;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.Map;
 import java.lang.ProcessBuilder;
 
 public class ProjectBuilder {
@@ -54,56 +59,65 @@ public class ProjectBuilder {
   }
 
   private static void createPomFile(String projectName) throws IOException {
-    try {
-      Path whereTo = Paths.get(getCurrentDir() + "/" + projectName + "/pom.xml");
-      Path templatePath = Paths.get("pom.template.xml");
-      String template = Files.readString(templatePath);
-      String toWrite = template.replace("{{PROJECT_NAME}}", projectName);
-      Files.writeString(whereTo, toWrite);
+    Map<String, String> replacements = new HashMap<>();
+    replacements.put("{{PROJECT_NAME}}", projectName);
+    String whereTo = getCurrentDir() + "/" + projectName + "/pom.xml";
+    String templatePath = "pom.template.xml";
+    createFileFromTemplate(whereTo, templatePath, replacements);
+  }
+
+  private static void createReadMe(String projectName) throws IOException {
+    Map<String, String> replacements = new HashMap<>();
+    replacements.put("{{PROJECT_NAME}}", projectName);
+    String whereTo = getCurrentDir() + "/" + projectName + "/README.md";
+    String templatePath = "README.template.md";
+    createFileFromTemplate(whereTo, templatePath, replacements);
+  }
+
+  private static void createGitIgnore(String projectName) throws IOException {
+    String whereTo = getCurrentDir() + "/" + projectName + "/.gitignore";
+    String templatePath = ".gitignore.template";
+    createFileFromTemplate(whereTo, templatePath);
+  }
+
+  private static void createMainFile(String projectName) throws IOException {
+    String whereTo = getCurrentDir() + "/" + projectName + "/src/main/java/com/hunter/Main.java";
+    String templatePath = "Main.template.java";
+    createFileFromTemplate(templatePath, whereTo);
+  }
+
+  private static void createFileFromTemplate(String resourceName, String outputPath) throws IOException {
+    Map<String, String> emptyMap = new HashMap<>();
+    createFileFromTemplate(resourceName, outputPath, emptyMap);
+  }
+
+  private static void createFileFromTemplate(String resourceName, String outputPath, Map<String, String> replacements)
+      throws IOException {
+    try (InputStream stream = ProjectBuilder.class.getClassLoader().getResourceAsStream("pom.template.xml")) {
+      InputStreamReader isr = new InputStreamReader(stream);
+      BufferedReader br = new BufferedReader(isr);
+
+      if (stream == null) {
+        throw new IOException("Resource not found: " + resourceName);
+      }
+
+      Path whereTo = Paths.get(outputPath);
+
+      StringBuilder modifiedContent = new StringBuilder();
+      String line;
+
+      while ((line = br.readLine()) != null) {
+        for (Map.Entry<String, String> entry : replacements.entrySet()) {
+          line = line.replaceAll(entry.getKey(), entry.getValue());
+        }
+        modifiedContent.append(line).append(System.lineSeparator());
+      }
+
+      Files.writeString(whereTo, modifiedContent.toString());
     } catch (IOException e) {
       System.err.println("Failed to write pom file: " + e.getMessage());
       e.printStackTrace();
       throw new IOException("Failed to write pom file: " + e.getMessage());
-    }
-  }
-
-  private static void createReadMe(String projectName) throws IOException {
-    try {
-      Path whereTo = Paths.get(getCurrentDir() + "/" + projectName + "/README.md");
-      Path templatePath = Paths.get("README.template.md");
-      String template = Files.readString(templatePath);
-      String toWrite = template.replace("{{PROJECT_NAME}}", projectName);
-      Files.writeString(whereTo, toWrite);
-    } catch (IOException e) {
-      System.err.println("Failed to write README: " + e.getMessage());
-      e.printStackTrace();
-      throw new IOException("Failed to write README: " + e.getMessage());
-    }
-  }
-
-  private static void createGitIgnore(String projectName) throws IOException {
-    try {
-      Path whereTo = Paths.get(getCurrentDir() + "/" + projectName + "/.gitignore");
-      Path templatePath = Paths.get(".gitignore.template");
-      String toWrite = Files.readString(templatePath);
-      Files.writeString(whereTo, toWrite);
-    } catch (IOException e) {
-      System.err.println("Failed to write gitignore: " + e.getMessage());
-      e.printStackTrace();
-      throw new IOException("Failed to write gitignore: " + e.getMessage());
-    }
-  }
-
-  private static void createMainFile(String projectName) throws IOException {
-    try {
-      Path whereTo = Paths.get(getCurrentDir() + "/" + projectName + "/src/main/java/com/hunter/Main.java");
-      Path templatePath = Paths.get("Main.template.java");
-      String toWrite = Files.readString(templatePath);
-      Files.writeString(whereTo, toWrite);
-    } catch (IOException e) {
-      System.err.println("Failed to write Main.java file: " + e.getMessage());
-      e.printStackTrace();
-      throw new IOException("Failed to write Main.java file: " + e.getMessage());
     }
   }
 
