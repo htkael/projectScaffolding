@@ -83,7 +83,7 @@ public class ProjectBuilder {
   private static void createMainFile(String projectName) throws IOException {
     String whereTo = getCurrentDir() + "/" + projectName + "/src/main/java/com/hunter/Main.java";
     String templatePath = "Main.template.java";
-    createFileFromTemplate(templatePath, whereTo);
+    createFileFromTemplate(whereTo, templatePath);
   }
 
   private static void createFileFromTemplate(String resourceName, String outputPath) throws IOException {
@@ -93,13 +93,13 @@ public class ProjectBuilder {
 
   private static void createFileFromTemplate(String resourceName, String outputPath, Map<String, String> replacements)
       throws IOException {
-    try (InputStream stream = ProjectBuilder.class.getClassLoader().getResourceAsStream("pom.template.xml")) {
-      InputStreamReader isr = new InputStreamReader(stream);
-      BufferedReader br = new BufferedReader(isr);
-
+    try (InputStream stream = ProjectBuilder.class.getClassLoader().getResourceAsStream(resourceName)) {
       if (stream == null) {
         throw new IOException("Resource not found: " + resourceName);
       }
+
+      InputStreamReader isr = new InputStreamReader(stream);
+      BufferedReader br = new BufferedReader(isr);
 
       Path whereTo = Paths.get(outputPath);
 
@@ -108,7 +108,7 @@ public class ProjectBuilder {
 
       while ((line = br.readLine()) != null) {
         for (Map.Entry<String, String> entry : replacements.entrySet()) {
-          line = line.replaceAll(entry.getKey(), entry.getValue());
+          line = line.replace(entry.getKey(), entry.getValue());
         }
         modifiedContent.append(line).append(System.lineSeparator());
       }
