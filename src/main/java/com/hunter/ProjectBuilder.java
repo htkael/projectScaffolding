@@ -63,7 +63,7 @@ public class ProjectBuilder {
     replacements.put("{{PROJECT_NAME}}", projectName);
     String whereTo = getCurrentDir() + "/" + projectName + "/pom.xml";
     String templatePath = "pom.template.xml";
-    createFileFromTemplate(whereTo, templatePath, replacements);
+    createFileFromTemplate(templatePath, whereTo, replacements);
   }
 
   private static void createReadMe(String projectName) throws IOException {
@@ -71,19 +71,19 @@ public class ProjectBuilder {
     replacements.put("{{PROJECT_NAME}}", projectName);
     String whereTo = getCurrentDir() + "/" + projectName + "/README.md";
     String templatePath = "README.template.md";
-    createFileFromTemplate(whereTo, templatePath, replacements);
+    createFileFromTemplate(templatePath, whereTo, replacements);
   }
 
   private static void createGitIgnore(String projectName) throws IOException {
     String whereTo = getCurrentDir() + "/" + projectName + "/.gitignore";
     String templatePath = ".gitignore.template";
-    createFileFromTemplate(whereTo, templatePath);
+    createFileFromTemplate(templatePath, whereTo);
   }
 
   private static void createMainFile(String projectName) throws IOException {
     String whereTo = getCurrentDir() + "/" + projectName + "/src/main/java/com/hunter/Main.java";
     String templatePath = "Main.template.java";
-    createFileFromTemplate(whereTo, templatePath);
+    createFileFromTemplate(templatePath, whereTo);
   }
 
   private static void createFileFromTemplate(String resourceName, String outputPath) throws IOException {
