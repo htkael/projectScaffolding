@@ -1,9 +1,11 @@
 package com.hunter;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.lang.ProcessBuilder;
 
 public class ProjectBuilder {
 
@@ -22,11 +24,19 @@ public class ProjectBuilder {
       ProjectBuilder.createNestedDirectories(projectName + "/src/test/java/com/hunter");
       ProjectBuilder.createPomFile(projectName);
       ProjectBuilder.createMainFile(projectName);
-    } catch (IOException e) {
+      ProjectBuilder.createReadMe(projectName);
+      ProjectBuilder.createGitIgnore(projectName);
+      ProcessBuilder pb = new ProcessBuilder("git", "init");
+      pb.directory(new File(getCurrentDir() + "/" + projectName));
+      Process init = pb.start();
+      exitCode = init.waitFor();
+    } catch (IOException | InterruptedException e) {
       exitCode = -1;
       System.err.println(e.getMessage());
       System.exit(exitCode);
     }
+
+    System.out.println("Successfully scaffolded java project!");
 
     System.exit(exitCode);
   }
@@ -54,6 +64,33 @@ public class ProjectBuilder {
       System.err.println("Failed to write pom file: " + e.getMessage());
       e.printStackTrace();
       throw new IOException("Failed to write pom file: " + e.getMessage());
+    }
+  }
+
+  private static void createReadMe(String projectName) throws IOException {
+    try {
+      Path whereTo = Paths.get(getCurrentDir() + "/" + projectName + "/README.md");
+      Path templatePath = Paths.get("README.template.md");
+      String template = Files.readString(templatePath);
+      String toWrite = template.replace("{{PROJECT_NAME}}", projectName);
+      Files.writeString(whereTo, toWrite);
+    } catch (IOException e) {
+      System.err.println("Failed to write README: " + e.getMessage());
+      e.printStackTrace();
+      throw new IOException("Failed to write README: " + e.getMessage());
+    }
+  }
+
+  private static void createGitIgnore(String projectName) throws IOException {
+    try {
+      Path whereTo = Paths.get(getCurrentDir() + "/" + projectName + "/.gitignore");
+      Path templatePath = Paths.get(".gitignore.template");
+      String toWrite = Files.readString(templatePath);
+      Files.writeString(whereTo, toWrite);
+    } catch (IOException e) {
+      System.err.println("Failed to write gitignore: " + e.getMessage());
+      e.printStackTrace();
+      throw new IOException("Failed to write gitignore: " + e.getMessage());
     }
   }
 

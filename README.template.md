@@ -1,4 +1,4 @@
-# Project Name
+# {{PROJECT_NAME}}
 
 ## Description
 
